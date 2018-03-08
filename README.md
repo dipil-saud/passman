@@ -1,4 +1,4 @@
-# passman
+# Commandline Password Manager
 A Simple commandline password manager written in ruby
 
 It encrypts the passwords with a masterkey and stores it in file for
@@ -11,6 +11,7 @@ name and url for the service.
 # Requirements
 * ruby
 * gem highline
+* pbcopy (so this currently only works in osx)
 
 # Usage
 * ruby ./passman.rb add|get|delete|edit
