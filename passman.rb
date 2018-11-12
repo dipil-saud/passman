@@ -1,6 +1,7 @@
 require 'highline'
 require 'openssl'
 require 'pstore'
+require 'securerandom'
 
 class EncryptedPStore < PStore
   attr_accessor :key
@@ -38,6 +39,9 @@ class PasswordManager
 
   def initialize
     @cli = HighLine.new
+  end
+
+  def ask_for_password
     if File.exist?(passwords_file_path)
       password = cli.ask("Key:  ") { |q| q.echo = false }
     else
@@ -60,11 +64,15 @@ class PasswordManager
     store.transaction { cli.say("Total: #{store.roots.count} Entries") }
   rescue OpenSSL::Cipher::CipherError
     cli.say("<%= color('Passphrase does not match', :red) %>")
-    initialize
+    ask_for_password
   end
 
-  def sendAction(action, *args)
-    case action.to_s.to_sym
+  def send_action(action, *args)
+    action = action.to_s.to_sym
+
+    ask_for_password unless action == :generate
+
+    case action
     when :get
       search_and_select(*args) do |entry|
         `echo #{entry[:password]} | pbcopy`
@@ -76,9 +84,17 @@ class PasswordManager
       edit_entry(*args)
     when :delete
       delete_entry(*args)
+    when :generate
+      generate_random_password(*args)
     else
       cli.say("<%= color('Action #{action} not recognized', :red) %>")
     end
+  end
+
+  def generate_random_password(*args)
+    new_password = SecureRandom.urlsafe_base64(16)
+    `echo #{new_password} | pbcopy`
+    cli.say("<%= color('Generated new password and copied to the clipboard', :green) %>")
   end
 
   def delete_entry(*args)
@@ -195,4 +211,4 @@ end
 pm = PasswordManager.new
 action = ARGV[0]
 
-pm.sendAction(action, *ARGV[1..-1])
+pm.send_action(action, *ARGV[1..-1])

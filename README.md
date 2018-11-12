@@ -14,7 +14,7 @@ name and url for the service.
 * pbcopy (so this currently only works in osx)
 
 # Usage
-* ruby ./passman.rb add|get|delete|edit
+* ruby ./passman.rb add|get|delete|edit|generate
 
 * add an alias in your bash/zshrc file for easy access
 i.e. alias passman="ruby path_to_passmanrb"
